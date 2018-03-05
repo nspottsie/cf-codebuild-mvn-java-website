@@ -1,0 +1,35 @@
+Description: >
+    This template deploys an AWS Code Build project for java and stores the output on S3
+    Last Modified: 3rd Mar 2018
+
+Parameters:
+  TemplateBaseUrlParameter:
+    Type: String
+    Default: https://s3.amazonaws.com/cf.awsguy.solutions/cf-build
+    Description: Enter the base url (without a trailing slash) to the s3 bucket containing the referenced cloudformation stacks
+
+Resources:
+    CodeBuildProject:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        TemplateURL: !Join ['/', [!Ref TemplateBaseUrlParameter, "build.yaml" ]]
+        Parameters:
+            ProjectName: "codebuild-mvn-java-website"
+            ProjectDescription: "Example CodeBuild Maven Java Website Build"
+            GitRepoUrl: "https://github.com/nspottsie/codebuild-mvn-java-website.git"
+            ArtifactS3BucketName: "build.awsguy.solutions"
+            ServiceRoleARN: !GetAtt "CodeBuildRole.Outputs.CodeBuildRoleARN"
+        Tags:
+          -
+            Key: "auto-delete"
+            Value: "no"
+    CodeBuildRole:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        TemplateURL: !Join ['/', [!Ref TemplateBaseUrlParameter, "roles.yaml" ]]
+        Parameters:
+          ArtifactS3BucketName: "build.awsguy.solutions"
+        Tags:
+          -
+            Key: "auto-delete"
+            Value: "no"
